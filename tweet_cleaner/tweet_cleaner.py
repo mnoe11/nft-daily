@@ -14,9 +14,7 @@ class TweetCleaner:
     with open(path_to_raw_tweets) as raw_tweet_file:
       return json.load(raw_tweet_file)
 
-  '''
-  Sanitizes and cleans the text in a tweet
-  '''
+  # Sanitizes and cleans the text in a tweet
   def __get_cleaned_tweet_text(self, raw_tweet_text):
     # Removes ampersands and replaces with and
     cleaned_text = raw_tweet_text.replace("&amp;", "and")
@@ -26,9 +24,22 @@ class TweetCleaner:
 
     return cleaned_text
 
+  # Gets the handles mentioned in a tweet
+  def __get_mentions_in_tweet(self, raw_tweet):
+    mentions = []
+
+    if "entities" in raw_tweet:
+      entities = raw_tweet["entities"]
+      if "mentions" in entities:
+        for mention in entities["mentions"]:
+          mentions.append(mention["username"])
+
+    return mentions
+
   # Gets a cleaned, and more easily consumable form of a tweet
   def __get_cleaned_tweet(self, raw_tweet, user_metadata):
     cleaned_text = self.__get_cleaned_tweet_text(raw_tweet["text"])
+    mentions = self.__get_mentions_in_tweet(raw_tweet)
 
     # Tweet Types: quoted, replied_to, tweet
     tweet_type = "tweet"
@@ -46,6 +57,7 @@ class TweetCleaner:
       "created_at": raw_tweet["created_at"],
       "user_metadata": user_metadata,
       "text": cleaned_text,
+      "mentions": mentions,
       "tweet_type": tweet_type,
       "referenced_tweet_id": referenced_tweet_id
     }
